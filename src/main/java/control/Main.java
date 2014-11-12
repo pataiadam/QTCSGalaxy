@@ -1,5 +1,8 @@
 package control;
-import control.api.ImpRestAPI;
+
+import control.api.RestAPI;
+import control.logic.AdamLogic;
+import control.logic.Logic;
 
 
 
@@ -7,7 +10,13 @@ import control.api.ImpRestAPI;
 public class Main {
 
 	public static void main(String[] args){
-		ImpRestAPI galaxy = new ImpRestAPI(args[0], args[1], args[2]);
+		if(args.length==3){
+			RestAPI galaxy = new RestAPI(args[0], args[1], args[2]);
+			Logic l = new AdamLogic();
+			galaxy.ping();
+		}else{
+			System.out.println("You shall not pass!!! (QTCS)");
+		}
 		System.out.println("Client exited");
 	}
 
