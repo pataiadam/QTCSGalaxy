@@ -1,12 +1,10 @@
-package control;
-
-import java.net.URL;
+package control.api;
 
 import org.json.simple.JSONArray;
 
 public class ImpRestAPI implements RestAPI {
 
-	public ImpRestAPI(URL url, String user, String passw){
+	public ImpRestAPI(String args, String user, String passw){
 		
 	}
 	
