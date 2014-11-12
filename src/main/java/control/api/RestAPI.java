@@ -8,6 +8,8 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.util.Base64;
 
+import javax.net.ssl.HttpsURLConnection;
+
 import org.json.simple.JSONArray;
 
 public class RestAPI  {
@@ -29,6 +31,7 @@ public class RestAPI  {
 
 	public String ping() {
 		String response = getURLString("/JavaChallenge1/rest/ping");
+		System.out.println("PING: "+response);
 		return response;
 	}
 
@@ -62,7 +65,7 @@ public class RestAPI  {
 		String result="";
 		try {
 			url = new URL(urls + path);
-			URLConnection urlConnection = url.openConnection();
+			HttpsURLConnection urlConnection = (HttpsURLConnection) url.openConnection();
 			urlConnection.setRequestProperty("Authorization", "Basic "
 					+ authStringEnc);
 			InputStream is = urlConnection.getInputStream();

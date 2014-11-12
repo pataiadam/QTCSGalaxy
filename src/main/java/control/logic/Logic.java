@@ -1,10 +1,11 @@
 package control.logic;
 
-import control.api.RestAPI;
 
 
 public interface Logic {
 
-	public String go(RestAPI api);
-	
+	public int[] drop();
+	public int[] pick();
+	public String go();
+
 }
