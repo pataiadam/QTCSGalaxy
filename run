@@ -1,0 +1,4 @@
+#!/bin/bash
+
+mvn clean package
+java -jar target/QTCSGalaxy-0.0.1-SNAPSHOT.jar "https://javahchallenge.dorsum.eu" "Quick Trick Clock Stack" iZdZCsRgoS
