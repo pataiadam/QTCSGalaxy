@@ -19,22 +19,23 @@ public class Main {
 				
 				/** Ha egy helyben áll */
 				try {
+					Thread.sleep(600);
 					modelStrore.refreshModel(galaxy);
 					int ms=modelStrore.getSpaceShip().getArriveAfterMs();
 					System.out.println("Úton még: "+ms+"ms");
 					if (ms == -1) {
 						logic.init(modelStrore);
-						Thread.sleep(600);
+						Thread.sleep(500);
 						control.drop(logic.drop());
-						Thread.sleep(600);
+						Thread.sleep(500);
 						control.pick(logic.pick());
-						Thread.sleep(600);
+						Thread.sleep(500);
 						control.go(logic.go());
-						Thread.sleep(600);
+						Thread.sleep(500);
 					} else if (modelStrore.getSpaceShip().getArriveAfterMs() >= 500) {
-						Thread.sleep(600);
+						Thread.sleep(500);
 					}
-				} catch (InterruptedException e) {
+				} catch (Exception e) {
 					System.err.println("HOPPÁ");
 				}
 			}

@@ -13,8 +13,9 @@ public class ModelStore {
 	private ArrayList<Planet> planets;
 	private SpaceShip spaceShip;
 
-	public void refreshModel(RestAPI galaxy) {
+	public void refreshModel(RestAPI galaxy) throws InterruptedException {
 		planets = setPlanets(galaxy.getGalaxy());
+		Thread.sleep(500);
 		spaceShip = setSpaceShip(galaxy.whereIs());
 	}
 
