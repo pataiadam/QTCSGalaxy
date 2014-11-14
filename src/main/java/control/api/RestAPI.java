@@ -1,24 +1,22 @@
 package control.api;
 
+import java.io.BufferedReader;
+import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.net.URLConnection;
 import java.util.Base64;
 
 import javax.net.ssl.HttpsURLConnection;
 
-import org.json.simple.JSONArray;
-
-public class RestAPI  {
+public class RestAPI {
 
 	private String urls;
 	private String user;
 	private String password;
 	private String authStringEnc;
-
 
 	public RestAPI(String urls, String users, String passw) {
 		this.urls = urls;
@@ -31,7 +29,7 @@ public class RestAPI  {
 
 	public String ping() {
 		String response = getURLString("/JavaChallenge1/rest/ping");
-		System.out.println("PING: "+response);
+		System.out.println("PING: " + response);
 		return response;
 	}
 
@@ -41,31 +39,35 @@ public class RestAPI  {
 	}
 
 	public String go(String planet) {
-		String response = getURLString("/JavaChallenge1/rest/go?planetName="+planet);
+		String response = postURLString("/JavaChallenge1/rest/go",
+				"planetName", planet);
 		return response;
 	}
 
-	public String wherels() {
+	public String whereIs() {
 		String response = getURLString("/JavaChallenge1/rest/whereIs");
 		return response;
 	}
 
 	public String pickPackage(int packageId) {
-		String response = getURLString("/JavaChallenge1/rest/pickPackage?packageId="+packageId);
+		String response = postURLString("/JavaChallenge1/rest/pickPackage",
+				"packageId", packageId+"");
 		return response;
 	}
 
 	public String dropPackage(int packageId) {
-		String response = getURLString("/JavaChallenge1/rest/dropPackage?packageId="+packageId);
+		String response = postURLString("/JavaChallenge1/rest/dropPackage",
+				"packageId", packageId+"");
 		return response;
 	}
 
 	private String getURLString(String path) {
 		URL url;
-		String result="";
+		String result = "";
 		try {
 			url = new URL(urls + path);
-			HttpsURLConnection urlConnection = (HttpsURLConnection) url.openConnection();
+			HttpsURLConnection urlConnection = (HttpsURLConnection) url
+					.openConnection();
 			urlConnection.setRequestProperty("Authorization", "Basic "
 					+ authStringEnc);
 			InputStream is = urlConnection.getInputStream();
@@ -87,6 +89,45 @@ public class RestAPI  {
 		}
 
 		return result;
+	}
+
+	private String postURLString(String path, String id, String param) {
+		String response="";
+		try {
+			URL obj = new URL(urls + path);
+			HttpsURLConnection con = (HttpsURLConnection) obj.openConnection();
+
+			// add reuqest header
+			con.setRequestMethod("POST");
+			con.setRequestProperty("Accept-Language", "en-US,en;q=0.5");
+			con.setRequestProperty("Authorization", "Basic "
+					+ authStringEnc);
+
+			String urlParameters = id + "=" + param;
+
+			// Send post request
+			con.setDoOutput(true);
+			DataOutputStream wr = new DataOutputStream(con.getOutputStream());
+			wr.writeBytes(urlParameters);
+			wr.flush();
+			wr.close();
+
+			int responseCode = con.getResponseCode();
+			System.out.println("Response Code : " + responseCode);
+
+			BufferedReader in = new BufferedReader(new InputStreamReader(
+					con.getInputStream()));
+			String inputLine;
+
+			while ((inputLine = in.readLine()) != null) {
+				response+=inputLine;
+			}
+			in.close();
+		} catch (Exception e) {
+			System.out.println("Upsz: " + e);
+		}
+
+		return response;
 	}
 
 }

@@ -1,22 +1,17 @@
 package control.logic;
 
+import model.ModelStore;
+
 public class LaszloLogic implements Logic {
 
-	/**
-	 * Ez fut le legelőször, ekkor kapod meg a galaxis jelenlegi állapotát
-	 * 
-	 * @param megkapod
-	 *            a galaxist ArrayList<Planet>
-	 */
-	public void init() {
-
+	public void init(ModelStore modelStrore) {
+		// TODO Auto-generated method stub
+		
 	}
 
 	/**
 	 * Lepakolja a csomago(ka)t a hajóról.
 	 * 
-	 * @param Az
-	 *            űrhajón lévő package-ek :list
 	 * @return a leszállítani kívánt csomagok id-jei
 	 */
 	public int[] drop() {
@@ -26,8 +21,6 @@ public class LaszloLogic implements Logic {
 	/**
 	 * Felveszi a bolygóról a csomagokat
 	 * 
-	 * @param Az
-	 *            bolygón lévő package-ek :list
 	 * @return a felvenni kívánt csomagok id-jei
 	 */
 	public int[] pick() {
@@ -43,4 +36,6 @@ public class LaszloLogic implements Logic {
 		// TODO Auto-generated method stub
 		return null;
 	}
+
+
 }
