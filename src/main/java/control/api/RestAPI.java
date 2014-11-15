@@ -30,34 +30,40 @@ public class RestAPI {
 	public String ping() {
 		String response = getURLString("/JavaChallenge1/rest/ping");
 		System.out.println("PING: " + response);
+		sleep500();
 		return response;
 	}
 
 	public String getGalaxy() {
 		String response = getURLString("/JavaChallenge1/rest/getGalaxy");
+		sleep500();
 		return response;
 	}
 
 	public String go(String planet) {
 		String response = postURLString("/JavaChallenge1/rest/go",
 				"planetName", planet);
+		sleep500();
 		return response;
 	}
 
 	public String whereIs() {
 		String response = getURLString("/JavaChallenge1/rest/whereIs");
+		sleep500();
 		return response;
 	}
 
 	public String pickPackage(int packageId) {
 		String response = postURLString("/JavaChallenge1/rest/pickPackage",
 				"packageId", packageId+"");
+		sleep500();
 		return response;
 	}
 
 	public String dropPackage(int packageId) {
 		String response = postURLString("/JavaChallenge1/rest/dropPackage",
 				"packageId", packageId+"");
+		sleep500();
 		return response;
 	}
 
@@ -130,4 +136,12 @@ public class RestAPI {
 		return response;
 	}
 
+	private void sleep500(){
+		try {
+			Thread.sleep(500);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
 }

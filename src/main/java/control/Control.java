@@ -10,28 +10,39 @@ public class Control {
 		this.api = api;
 	}
 
-	public void drop(int[] drops) throws InterruptedException {
+	public String drop(int[] drops) throws InterruptedException {
+		String ret = "";
 		if (drops != null) {
 			for (int i : drops) {
-				api.dropPackage(i);
-				Thread.sleep(500);
+				if (i != 0) {
+					ret+=i+" ";
+					api.dropPackage(i);
+				}
 			}
 		}
+		return "Dropped: [ "+ret+"]";
 	}
 
-	public void pick(int[] picks) throws InterruptedException {
+	public String pick(int[] picks) throws InterruptedException {
+		String ret = "";
 		if (picks != null) {
 			for (int i : picks) {
-				api.pickPackage(i);
-				Thread.sleep(500);
+				if (i != 0) {
+					ret+=i+" ";
+					api.pickPackage(i);
+				}
 			}
 		}
+		return "Picked: [ "+ret+"]";
 	}
 
-	public void go(String target) {
+	public String go(String target) {
+		String ret = "?";
 		if (target != null) {
+			ret=target;
 			api.go(target);
 		}
+		return "Go to: [ "+ret+" ]";
 	}
 
 }

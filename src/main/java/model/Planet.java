@@ -7,6 +7,7 @@ public class Planet {
 	private double x;
 	private double y;
 	private ArrayList<Package> packages;
+	private int index;
 
 	public Planet() {
 		this.packages = new ArrayList<Package>();
@@ -25,9 +26,9 @@ public class Planet {
 		return temp;
 	}
 
-	// MiÃ©rt tennÃ©nk vissza??
+	// Miért tennénk vissza??
 	public boolean putPackage(Package pck) {
-		if (pck.getOriginalPlanet().equals(this.name)) {
+		if (pck.getTargetPlanet().equals(this.name)) {
 			this.packages.add(pck);
 			return true;
 		}
@@ -40,11 +41,12 @@ public class Planet {
 		for (Package pck : this.packages) {
 			planet.packages.add(pck);
 		}
+		planet.setIndex(this.index);
 		return planet;
 	}
 
 	public boolean sameAs(Planet planet) {
-		return planet.name.equals(planet.name);
+		return planet.name.equals(this.name);
 	}
 
 	public double distFrom(Planet planet) {
@@ -82,5 +84,13 @@ public class Planet {
 
 	public void setPackages(ArrayList<Package> packages) {
 		this.packages = packages;
+	}
+
+	public int getIndex() {
+		return index;
+	}
+
+	public void setIndex(int index) {
+		this.index = index;
 	}
 }
