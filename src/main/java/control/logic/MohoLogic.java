@@ -46,33 +46,23 @@ public class MohoLogic implements Logic {
 		int[] ret = new int[3];
 		Planet actPlanet = getPlanetByName(actualPlanetName);
 
-		if (ship.getPackages().size() == 0) {
-			Package pack = getBestPackage(actPlanet);
-			Package pack2 = getSecondPackage(actPlanet, pack);
-
-			if (pack != null) {
-				ret[0] = pack.getPackageId();
-				totalFee += pack.getFee();
-				System.out.println("MohoFee: " + pack.getFee() + " (total: "
-						+ totalFee + ")");
-				targetStack.add(pack.getTargetPlanet());
-			}  
-			if (pack2 != null){
-				ret[1] = pack2.getPackageId();
-				totalFee += pack2.getFee();
-				System.out.println("MohoFee: " + pack.getFee() + " (total: "
-						+ totalFee + ")");
-				targetStack.add(pack2.getTargetPlanet());
-			}
+		Package pack = getBestPackage(actPlanet);
+		if (pack != null) {
+			ret[0] = pack.getPackageId();
+			totalFee += pack.getFee();
+			System.out.println("MohoFee: " + pack.getFee() + " (total: "
+					+ totalFee + ")");
+			targetPlanetName = pack.getTargetPlanet();
+		} else {
+			// TODO: goto random planet
 		}
 
 		return ret;
 	}
 
 	public String go() {
-		String target = targetStack.get(targetStack.size() - 1);
-		targetStack.remove(targetStack.size() - 1);
-		return target;
+		//return targetPlanetName;
+		return ship.getPackages().get(0).getTargetPlanet();
 	}
 
 	private Planet getPlanetByName(String name) {
@@ -109,42 +99,11 @@ public class MohoLogic implements Logic {
 			if (!pck.getTargetPlanet().equals(actualPlanetName)) {
 				Planet target = getPlanetByName(pck.getTargetPlanet());
 				double dist = actPlanet.distFrom(target);
-				double feePerDist = ((double) pck.getFee()) / dist;
+				//double feePerDist = ((double) pck.getFee()) / dist;
+				double feePerDist = pck.getFee();
 				if (feePerDist > maxFeePerDist) {
 					pack = pck;
 					maxFeePerDist = feePerDist;
-				}
-			}
-		}
-		return pack;
-	}
-
-	private Package getSecondPackage(Planet actPlanet, Package bpack) {
-		// A - actPlanet, B - target, C - middle planet
-		Package pack = null;
-		Planet B = getPlanetByName(bpack.getTargetPlanet());
-		double Bf = bpack.getFee();
-		// timeWoSp
-		double timeAB = distances[actPlanet.getIndex()][B.getIndex()] / 6;
-		double timevalueRateAB = Bf / timeAB;
-		double maxRate = 0.0;
-		double z = 0.0;
-		for (Package p : actPlanet.getPackages()) {
-			if (!p.equals(bpack)) {
-				if (!p.getTargetPlanet().equals(actualPlanetName)) {
-					Planet C = getPlanetByName(p.getTargetPlanet());
-					double Cf = p.getFee();
-					double timeBC = distances[B.getIndex()][C.getIndex()] / 8;
-					double timeAC = distances[actPlanet.getIndex()][C
-							.getIndex()] / 8;
-					double timeWithSecondPack = timeAC + timeBC;
-					double rate = (Bf + Cf) / timeWithSecondPack;
-
-					if (rate > timevalueRateAB && rate > maxRate) {
-						maxRate = rate;
-						pack = p;
-					}
-
 				}
 			}
 		}

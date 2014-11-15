@@ -1,6 +1,8 @@
 package control;
 
 import model.ModelStore;
+import model.Package;
+import model.Planet;
 import control.api.RestAPI;
 import control.logic.Logic;
 import control.logic.MohoLogic;
@@ -24,6 +26,7 @@ public class Main {
 						System.out.println(control.drop(logic.drop()));
 						System.out.println(control.pick(logic.pick()));
 						System.out.println(control.go(logic.go()));
+						System.out.println(getGold(modelStrore));
 					} else if (modelStrore.getSpaceShip().getArriveAfterMs() >= 500) {
 						//ez csak azért, hogy ne írjon annyit a konzolra
 						Thread.sleep(500);
@@ -37,5 +40,19 @@ public class Main {
 			System.out.println("You shall not pass!!! (QTCS)");
 		}
 		System.out.println("Client exited");
+	}
+
+	private static String getGold(ModelStore modelStrore) {
+		int g=0;
+		for(Planet pl : modelStrore.getPlanets()){
+			String pln=pl.getName();
+			for(Package pa : pl.getPackages()){
+				if(!pa.getOriginalPlanet().equals(pln)){
+					g+=pa.getFee();
+				}
+			}
+		}
+		
+		return ">>>>>Total gold<<<<<: [ "+ (51500-g) + " ] ";
 	}
 }
