@@ -24,7 +24,7 @@ public class ModelStore {
 		Object obj = JSONValue.parse(galaxy);
 		JSONObject all = (JSONObject) obj;
 		JSONArray planets = (JSONArray) all.get("planets");
-
+		int index = 0;
 		for (Object pl : planets) {
 			Planet planetObj = new Planet();
 			planetObj.setName((String) ((JSONObject) pl).get("name"));
@@ -50,6 +50,8 @@ public class ModelStore {
 				packageList.add(packageObj);
 			}
 			planetObj.setPackages(packageList);
+			planetObj.setIndex(index);
+			index++;
 			planetsList.add(planetObj);
 		}
 
