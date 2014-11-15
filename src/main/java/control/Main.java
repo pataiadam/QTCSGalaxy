@@ -2,8 +2,6 @@ package control;
 
 import model.ModelStore;
 import control.api.RestAPI;
-import control.logic.AdamLogic;
-import control.logic.LaszloLogic;
 import control.logic.Logic;
 import control.logic.MohoLogic;
 
@@ -15,7 +13,7 @@ public class Main {
 			Logic logic = new MohoLogic();
 			Control control = new Control(galaxy);
 			ModelStore modelStrore = new ModelStore();
-
+			
 			while (true) {
 				try {
 					modelStrore.refreshModel(galaxy);
@@ -27,6 +25,7 @@ public class Main {
 						System.out.println(control.pick(logic.pick()));
 						System.out.println(control.go(logic.go()));
 					} else if (modelStrore.getSpaceShip().getArriveAfterMs() >= 500) {
+						//ez csak azért, hogy ne írjon annyit a konzolra
 						Thread.sleep(500);
 					}
 				} catch (Exception e) {

@@ -9,6 +9,7 @@ import model.SpaceShip;
 
 public class MohoLogic implements Logic {
 
+	private int totalFee=0;
 	private SpaceShip ship;
 	private String actualPlanetName;
 	private String targetPlanetName;
@@ -52,6 +53,8 @@ public class MohoLogic implements Logic {
 		}
 		if (pack != null){
 			ret[0] = pack.getPackageId();
+			totalFee+=pack.getFee();
+			System.out.println("MohoFee: "+pack.getFee()+" (total: "+totalFee+")");
 			targetPlanetName=pack.getTargetPlanet();
 		}else{
 			//hát ha ebbe belefut akkor a bolygón minden csomag target csomag
