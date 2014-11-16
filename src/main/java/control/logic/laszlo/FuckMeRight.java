@@ -8,23 +8,25 @@ import model.Planet;
 import model.Tree;
 
 public class FuckMeRight implements Runnable{
-	private Thread t;
-	private static final int MAX_NODE_NUM = 60000;
-	private static final int MIN_NODE_NUM = 20000;
+	private static final int MAX_NODE_NUM = 30000;
+	private static final int MIN_NODE_NUM = 10000;
 	private static final int MAX_CAPACITY = 3;
+	private Thread t;
+
 	private Tree mainRoot;
-	
-	private LaszloLogic buffer;
-	// for speed
-	private double bestRatio;
-	private double actualRatio;
-	private Tree bestLeaf;
 	private ArrayList<Tree> allTreeNoRecursion;
 	private ArrayList<Tree> nodesToCheck;
+	private LaszloLogic buffer;
+	private int allowedNodeNum;
 	private double[][] distances;
 	private int planetNum;
-	// encahncement
-	private int currentNodeNum;
+
+	private double bestRatio;
+	private double actualRatio;
+
+	private Tree bestLeaf;
+	private int incomeDiff;
+	private double timeDiff;
 
 	public void start(LaszloLogic buffer) {
 		//System.out.println("Buffer opened...");
@@ -36,44 +38,6 @@ public class FuckMeRight implements Runnable{
 	public void stop() {
 		this.t = null;
 		//System.out.println("Buffer closed...");
-	}
-	
-	
-	public static void main(String[] args) {
-		ArrayList<Planet> galaxyState = new ArrayList<Planet>();
-		Planet planet;
-		planet = new Planet("1", 1, 1, new ArrayList<Package>());
-		planet.getPackages().add(new Package(1, "1", "3", "", "1", 2));
-		planet.getPackages().add(new Package(2, "1", "2", "", "1", 8));
-		galaxyState.add(planet);
-		planet = new Planet("2", 2, 3, new ArrayList<Package>());
-		planet.getPackages().add(new Package(5, "2", "4", "", "2", 3));
-		planet.getPackages().add(new Package(6, "2", "3", "", "2", 5));
-		galaxyState.add(planet);
-		planet = new Planet("3", 3, 2, new ArrayList<Package>());
-		planet.getPackages().add(new Package(3, "3", "5", "", "3", 7));
-		planet.getPackages().add(new Package(4, "3", "1", "", "3", 1));
-		planet.getPackages().add(new Package(11, "1", "4", "", "3", 8));
-		galaxyState.add(planet);
-		planet = new Planet("4", 3, 5, new ArrayList<Package>());
-		planet.getPackages().add(new Package(7, "4", "3", "", "4", 2));
-		galaxyState.add(planet);
-		planet = new Planet("5", 1, 6, new ArrayList<Package>());
-		planet.getPackages().add(new Package(8, "5", "2", "", "5", 4));
-		planet.getPackages().add(new Package(9, "5", "2", "", "5", 2));
-		galaxyState.add(planet);
-		planet = new Planet("6", 3, 7, new ArrayList<Package>());
-		planet.getPackages().add(new Package(10, "6", "3", "", "6", 1));
-		galaxyState.add(planet);
-		FuckMeRight fmr = new FuckMeRight();
-		Tree tree = new Tree();
-		tree.setTime(0.0);
-		tree.setIncome(0);
-		tree.setActualGalaxyState(galaxyState);
-		tree.setActualPlanet(galaxyState.get(2));
-		fmr.setMainRoot(tree);
-		fmr.setAllTreeNoRecursion(new ArrayList<Tree>());
-		
 	}
 
 	public Tree getMainRoot() {
@@ -93,15 +57,37 @@ public class FuckMeRight implements Runnable{
 	}
 
 	public void run() {
-		int rewardSum = 0;
+
+		this.allTreeNoRecursion = new ArrayList<Tree>();
+		this.nodesToCheck = new ArrayList<Tree>();
+		this.incomeDiff = 0;
+		this.timeDiff = 0.0;
+
 		this.planetNum = this.mainRoot.getActualGalaxyState().size();
-		for (int i = 0; i < this.mainRoot.getActualGalaxyState().size(); i++) {
-			Planet planet = this.mainRoot.getActualGalaxyState().get(i);
-			for (Package pck : planet.getPackages()){
+
+		int rewardSum = 0;
+		for (Planet planet : this.mainRoot.getActualGalaxyState()) {
+			for (Package pck : planet.getPackages()) {
 				rewardSum += pck.getFee();
 			}
-			planet.setIndex(i);
 		}
+
+		// targetPlanetId beallitasa
+		for (Planet planet : this.mainRoot.getActualGalaxyState()) {
+			String planetName = planet.getName();
+			for (Planet planet2 : this.mainRoot.getActualGalaxyState()) {
+				for (Package pck : planet2.getPackages()) {
+					if (pck.getOriginalPlanet().equals(planetName)) {
+						pck.setOriginalPlanetIndex(planet.getIndex());
+					}
+					if (pck.getTargetPlanet().equals(planetName)) {
+						pck.setTargetPlanetIndex(planet.getIndex());
+					}
+				}
+			}
+		}
+
+		// tavolsagok tarolasa
 		this.distances = new double[planetNum][planetNum];
 		for (int i = 0; i < this.planetNum; i++) {
 			for (int k = 0; k < this.planetNum; k++) {
@@ -117,28 +103,30 @@ public class FuckMeRight implements Runnable{
 				}
 			}
 		}
-		System.out.println("packageSum: " + rewardSum);
-		this.nodesToCheck = new ArrayList<Tree>();
+
+		System.out.println("rewardSum: " + rewardSum);
 		while (true) {
-			this.currentNodeNum = MIN_NODE_NUM + (10000
-					* this.buffer.bufferSize());
-			if (this.currentNodeNum > MAX_NODE_NUM)
-				this.currentNodeNum = MAX_NODE_NUM;
-			System.out.println("\ncurrentNodeNum: " + this.currentNodeNum);
+			this.allowedNodeNum = MIN_NODE_NUM 
+				+	(5000 * (this.buffer.getBufferSize()-1));
+			if (this.allowedNodeNum > MAX_NODE_NUM)
+				this.allowedNodeNum = MAX_NODE_NUM;
+			System.out.println("\nallowedNodeNum: " + this.allowedNodeNum);
 			this.allTreeNoRecursion.add(this.mainRoot);
 			int index = 0;
 
 			try {
-				while (allTreeNoRecursion.size() < this.currentNodeNum) {
-					this.allTreeNoRecursion.addAll(this
-							.buildTree(this.allTreeNoRecursion.get(index)));
+				while (allTreeNoRecursion.size() < this.allowedNodeNum) {
+					for (Tree tree : this.buildTree(this.allTreeNoRecursion
+							.get(index))) {
+						this.allTreeNoRecursion.add(tree);
+					}
 					index++;
 				}
 			} catch (Exception e) {
-				// Nincs t�bb megn�zend� �llapot
+				// nincs tobb megnezendo allapot
 			}
 
-			// Csak a root van benne
+			// csak a root van, gg
 			if (this.allTreeNoRecursion.size() == 1) {
 				break;
 			}
@@ -146,45 +134,49 @@ public class FuckMeRight implements Runnable{
 			this.evaluate();
 			this.findDirectSuccessorOfRoot();
 
-			// System.out.println(bestLeaf);
-
-			// System.out.println("Next step: " + nextStep.printNode());
-
-			// System.out.println("nodes: " + allTreeNoRecursion.size() + "\n")
-
+			// uzenet epitese
 			if (this.mainRoot.getActualPlanet().getIndex() != this.bestLeaf
 					.getActualPlanet().getIndex()) {
 				this.buffer.addOrder(this.bestLeaf.getActualPlanet().getName(),
-						-1, -1, this.bestLeaf.getIncome(), this.bestLeaf.getTime());
+						-1, -1, this.bestLeaf.getIncome(),
+						this.bestLeaf.getTime());
 			} else if (this.mainRoot.getPackagesCarried().size() < this.bestLeaf
 					.getPackagesCarried().size()) {
 				for (Package pck : this.bestLeaf.getPackagesCarried()) {
 					if (!this.mainRoot.getPackagesCarried().contains(pck)) {
-						this.buffer.addOrder(null, pck.getPackageId(), -1, this.bestLeaf.getIncome(), this.bestLeaf.getTime());
+						this.buffer.addOrder(null, pck.getPackageId(), -1,
+								this.bestLeaf.getIncome(),
+								this.bestLeaf.getTime());
+						break;
 					}
 				}
 			} else {
 				for (Package pck : this.mainRoot.getPackagesCarried()) {
 					if (!this.bestLeaf.getPackagesCarried().contains(pck)) {
-						this.buffer.addOrder(null, -1, pck.getPackageId(), this.bestLeaf.getIncome(), this.bestLeaf.getTime());
+						this.buffer.addOrder(null, -1, pck.getPackageId(),
+								this.bestLeaf.getIncome(),
+								this.bestLeaf.getTime());
+						break;
 					}
 				}
 			}
-			
 
+			// ujrainditas
 			this.mainRoot = this.bestLeaf;
 			this.mainRoot.setParent(null);
-			this.mainRoot.getChildren().clear();
+			this.incomeDiff = this.mainRoot.getIncome();
+			this.timeDiff = this.mainRoot.getTime();
 			this.mainRoot.setTime(0.0);
 			this.mainRoot.setIncome(0);
-
 			this.allTreeNoRecursion.clear();
 			this.nodesToCheck.clear();
 		}
+		System.out.println("Done.");
 
 	}
-
-	private boolean isNodeAlreadyExists(Tree toAdd) {
+	
+		// azonos allapotok keresese
+	private boolean isNodeExists(Tree toAdd) {
 		for (Tree tree : this.nodesToCheck) {
 			if (this.compareNodes(toAdd, tree)) {
 				return true;
@@ -193,6 +185,7 @@ public class FuckMeRight implements Runnable{
 		return false;
 	}
 
+	// segedfuggveny
 	private boolean compareNodes(Tree treeA, Tree treeB) {
 		if ((Double.compare(treeA.getTime(), treeB.getTime()) != 0)
 				|| treeA.getIncome() != treeB.getIncome()
@@ -206,99 +199,172 @@ public class FuckMeRight implements Runnable{
 		return true;
 	}
 
-	private boolean nothingToDoHere(Tree tree, Planet planet) {
-		if (tree.getPackagesCarried().size() == 0
-				&& planet.getPackages().size() == 0) {
-			return true;
-		} else if (tree.getPackagesCarried().size() == MAX_CAPACITY) {
-			for (Package pck : tree.getPackagesCarried()) {
-				if (pck.getOriginalPlanet().equals(planet.getName())
-						|| pck.getTargetPlanet().equals(planet.getName())) {
-					return false;
-				}
+	// a deadend nem jo es nem is vicces
+	// csak ugrasnak hivodik meg
+	private boolean isDeadEnd(Tree root) {
+		// nem tud felvenni
+		if (root.getActualPlanet().getPackages().size() == 0
+				|| root.getPackagesCarried().size() == MAX_CAPACITY) {
+			// nem tud lerakni
+			if (!this.canDropHere(root)) {
+				return true;
 			}
-			return true;
 		}
-		return false;
 
+		return false;
 	}
 
+	// segedfuggveny az isDeadEnd() -hez
+	private boolean canDropHere(Tree root) {
+		for (Package pck : root.getPackagesCarried()) {
+			if (pck.getOriginalPlanetIndex() == root.getActualPlanet()
+					.getIndex()
+					|| pck.getTargetPlanetIndex() == root.getActualPlanet()
+							.getIndex()) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	// fa epitese
 	private ArrayList<Tree> buildTree(Tree root) {
 
-		// 1. LEAD�S HELYBEN
-		for (Package pck : root.getPackagesCarried()) {
-			if (pck.getTargetPlanet().equals(root.getActualPlanet().getName())) {
-				Tree child = new Tree();
-				child.setIncome(root.getIncome() + pck.getFee());
-				child.setTime(root.getTime() + 0.5);
-
-				child.getPackagesCarried().addAll(root.getPackagesCarried());
-				child.getPackagesCarried().remove(pck);
-
-				child.setDoneSomething(true);
-				child.setActualGalaxyState(root.getActualGalaxyState());
-				child.setActualPlanet(root.getActualPlanet());
-				child.setParent(root);
-				root.getChildren().add(child);
+		// ujrafelhasznalas - csak par ertek update, a statuszok nem valtoznak
+		if (root.getChildren().size() > 0) {
+			for (Tree child : root.getChildren()) {
+				child.setIncome(child.getIncome() - this.incomeDiff);
+				child.setTime(child.getTime() - this.timeDiff);
 			}
 		}
 
-		// 2. FELV�TEL
-		if (root.getPackagesCarried().size() < MAX_CAPACITY) {
-			for (Package pck : root.getActualPlanet().getPackages()) {
-				Tree child = new Tree();
-				child.setTime(root.getTime() + 0.5);
-				child.setIncome(root.getIncome());
+		// uj levelek letrehozasa
+		else {
+			// 1. LEADAS HELYBEN
+			for (Package pck : root.getPackagesCarried()) {
+				if (pck.getTargetPlanetIndex() == root.getActualPlanet()
+						.getIndex()) {
+					Tree child = new Tree();
+					child.setIncome(root.getIncome() + pck.getFee());
+					child.setTime(root.getTime() + 0.5);
 
-				child.getPackagesCarried().addAll(root.getPackagesCarried());
+					for (Package pck2 : root.getPackagesCarried()) {
+						if (pck != pck2) {
+							child.getPackagesCarried().add(pck2);
+						}
+					}
 
-				if (!this.isNodeAlreadyExists(child)) {
-					// late initialize for speed
-					child.getPackagesCarried().add(pck);
-					child.setDoneSomething(true);
-					Planet modifiedPlanet = root.getActualPlanet().getCopy();
-					modifiedPlanet.getPackages().remove(pck);
-					child.setActualPlanet(modifiedPlanet);
-					child.setParent(root);
-					child.setActualGalaxyState(new ArrayList<Planet>());
-					child.getActualGalaxyState().addAll(
-							root.getActualGalaxyState());
-					child.getActualGalaxyState().remove(root.getActualPlanet());
-					child.getActualGalaxyState().add(modifiedPlanet);
-					root.getChildren().add(child);
-					this.nodesToCheck.add(child);
+					if (!this.isNodeExists(child)) {
+						child.setParent(root);
+						child.setActualGalaxyState(root.getActualGalaxyState());
+						child.setActualPlanet(root.getActualPlanet());
+
+						root.getChildren().add(child);
+						this.nodesToCheck.add(child);
+					}
+				}
+				if (pck.getOriginalPlanetIndex() == root.getActualPlanet()
+						.getIndex()) {
+					Tree child = new Tree();
+					child.setIncome(root.getIncome());
+					child.setTime(root.getTime() + 0.5);
+
+					for (Package pck2 : root.getPackagesCarried()) {
+						if (pck != pck2) {
+							child.getPackagesCarried().add(pck2);
+						}
+					}
+
+					if (!this.isNodeExists(child)) {
+						child.setParent(root);
+						Planet modifiedPlanet = root.getActualPlanet()
+								.getCopy();
+						modifiedPlanet.getPackages().add(pck);
+						child.setActualGalaxyState(new ArrayList<Planet>());
+						for (Planet planet : root.getActualGalaxyState()) {
+							if (planet != root.getActualPlanet()) {
+								child.getActualGalaxyState().add(planet);
+							}
+						}
+						child.getActualGalaxyState().add(modifiedPlanet);
+						child.setActualPlanet(modifiedPlanet);
+
+						root.getChildren().add(child);
+						this.nodesToCheck.add(child);
+					}
 				}
 			}
-		}
 
-		// 3. �TUGR�S, HA AZ EL�Z� L�P�S NEM �TUGR�S VOLT
-		if (root.isDoneSomething()) {
-			for (Planet toGo : root.getActualGalaxyState()) {
-				if (toGo.getIndex() != root.getActualPlanet().getIndex()
-						&& !this.nothingToDoHere(root, toGo)) {
+			// 2. FELVETEL
+			if (root.getPackagesCarried().size() < MAX_CAPACITY) {
+				for (Package pck : root.getActualPlanet().getPackages()) {
 					Tree child = new Tree();
-					child.setActualGalaxyState(root.getActualGalaxyState());
-					child.setActualPlanet(toGo);
+					child.setTime(root.getTime() + 0.5);
 					child.setIncome(root.getIncome());
-					child.setParent(root);
-					child.setTime(root.getTime()
-							+ this.distances[toGo.getIndex()][root
-									.getActualPlanet().getIndex()]
-							/ this.preconfiguredSpeed(root.getPackagesCarried()
-									.size()));
-					child.getPackagesCarried()
-							.addAll(root.getPackagesCarried());
-					root.getChildren().add(child);
+
+					for (Package pck2 : root.getPackagesCarried()) {
+						child.getPackagesCarried().add(pck2);
+					}
+					child.getPackagesCarried().add(pck);
+
+					if (!this.isNodeExists(child)) {
+						child.setParent(root);
+						Planet modifiedPlanet = root.getActualPlanet()
+								.getCopy();
+						modifiedPlanet.getPackages().remove(pck);
+						child.setActualPlanet(modifiedPlanet);
+						child.setActualGalaxyState(new ArrayList<Planet>());
+						for (Planet planet : root.getActualGalaxyState()) {
+							if (planet != root.getActualPlanet()) {
+								child.getActualGalaxyState().add(planet);
+							}
+						}
+						child.getActualGalaxyState().add(modifiedPlanet);
+
+						root.getChildren().add(child);
+						this.nodesToCheck.add(child);
+					}
+				}
+			}
+
+			// 3. ATUGRAS, HA AZ ELOZO LEPES NEM ATUGRAS VOLT
+			if (!root.isJustJumped()) {
+				for (Planet toGo : root.getActualGalaxyState()) {
+					if (toGo.getIndex() != root.getActualPlanet().getIndex()) {
+						Tree child = new Tree();
+						child.setActualPlanet(toGo);
+
+						for (Package pck2 : root.getPackagesCarried()) {
+							child.getPackagesCarried().add(pck2);
+						}
+
+						if (!this.isDeadEnd(child)) {
+							child.setActualGalaxyState(root
+									.getActualGalaxyState());
+							child.setJustJumped(true);
+							child.setIncome(root.getIncome());
+							child.setTime(root.getTime()
+									+ this.distances[toGo.getIndex()][root
+											.getActualPlanet().getIndex()]
+									/ this.preconfiguredSpeed(root
+											.getPackagesCarried().size()));
+							child.setParent(root);
+
+							root.getChildren().add(child);
+						}
+					}
 				}
 			}
 		}
 		return root.getChildren();
 	}
 
+	// megkeresi a legjobb levelet
 	private void evaluate() {
 		this.bestRatio = -1.0;
 		for (Tree tree : this.allTreeNoRecursion) {
-			if (tree.getChildren().size() == 0) { // lev�l
+			// level
+			if (tree.getChildren().size() == 0) {
 				this.actualRatio = tree.getIncome() / tree.getTime();
 				if (this.actualRatio > this.bestRatio) {
 					this.bestRatio = this.actualRatio;
@@ -308,13 +374,14 @@ public class FuckMeRight implements Runnable{
 		}
 	}
 
+	// visszakeresi a legjobb levelhez tartozo kovetkezo lepest
 	private void findDirectSuccessorOfRoot() {
 		while (this.bestLeaf.getParent() != this.mainRoot) {
 			this.bestLeaf = this.bestLeaf.getParent();
 		}
 	}
 
-	// for speed
+	// hardcoded sebesseg
 	private int preconfiguredSpeed(int packageNum) {
 		switch (packageNum) {
 		case 3:
@@ -327,5 +394,4 @@ public class FuckMeRight implements Runnable{
 			return 10;
 		}
 	}
-
 }

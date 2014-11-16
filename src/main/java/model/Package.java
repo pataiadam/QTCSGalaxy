@@ -7,18 +7,21 @@ public class Package {
 	private String text;
 	private String actualPlanet;
 	private int fee;
+	// ne kelljen stringeken vegigmenni osszehasonlitasnal
+	private int targetPlanetIndex;
+	private int originalPlanetIndex;
 
 	public Package() {
 	}
 
 	public Package(int packageId, String originalPlanet, String targetPlanet,
 			String text, String actualPlanet, int fee) {
-		this.setPackageId(packageId);
-		this.setOriginalPlanet(originalPlanet);
-		this.setTargetPlanet(targetPlanet);
-		this.setText(text);
-		this.setActualPlanet(actualPlanet);
-		this.setFee(fee);
+		this.packageId = packageId;
+		this.originalPlanet = originalPlanet;
+		this.targetPlanet = targetPlanet;
+		this.text = text;
+		this.actualPlanet = actualPlanet;
+		this.fee = fee;
 	}
 
 	public int getPackageId() {
@@ -67,5 +70,21 @@ public class Package {
 
 	public void setFee(int fee) {
 		this.fee = fee;
+	}
+
+	public int getTargetPlanetIndex() {
+		return targetPlanetIndex;
+	}
+
+	public void setTargetPlanetIndex(int targetPlanetIndex) {
+		this.targetPlanetIndex = targetPlanetIndex;
+	}
+
+	public int getOriginalPlanetIndex() {
+		return originalPlanetIndex;
+	}
+
+	public void setOriginalPlanetIndex(int originalPlanetIndex) {
+		this.originalPlanetIndex = originalPlanetIndex;
 	}
 }

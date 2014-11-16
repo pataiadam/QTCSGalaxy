@@ -26,7 +26,7 @@ public class LaszloLogic implements Logic, Runnable{
 		private int income = 0;
 		private double time = 0.0;
 
-		public Order(String target, int dropId, int pickId, int income,
+		public Order(String target, int pickId, int dropId, int income,
 				double time) {
 			this.target = target;
 			this.dropId = dropId;
@@ -56,20 +56,21 @@ public class LaszloLogic implements Logic, Runnable{
 		}
 	}
 
-	public void addOrder(String target, int dropId, int pickId, int income,
+	public void addOrder(String target, int pickId, int dropId, int income,
 			double time) {
-		this.orderList.add(new Order(target, dropId, pickId, income, time));
+		this.orderList.add(new Order(target, pickId, dropId, income, time));
 	}
 
-	public int bufferSize() {
+	public int getBufferSize() {
 		return this.orderList.size();
 	}
 
 	public void start() {
 		System.out.println("Buffer opened...");
 		this.t = new Thread(this);
-		this.t.start();
 		this.orderList = new ArrayList<Order>();
+		this.t.start();
+		
 	}
 
 	public void stop() {

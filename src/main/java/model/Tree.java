@@ -9,12 +9,13 @@ public class Tree {
 	private Planet actualPlanet;
 	private ArrayList<Package> packagesCarried;
 	private ArrayList<Tree> children;
-	private Tree parent = null;
-	private boolean doneSomething = false;
+	private boolean justJumped;
+	private Tree parent;
 
 	public Tree() {
 		this.packagesCarried = new ArrayList<Package>();
 		this.children = new ArrayList<Tree>();
+		this.justJumped = false;
 	}
 	
 	public String printNode(){
@@ -22,6 +23,8 @@ public class Tree {
 		s += "actualPlanet: " + this.actualPlanet.getName() + "\n";
 		s += "income: " + this.income + "\n";
 		s += "time: " + this.time + "\n";
+		s += "justJumped: " + this.justJumped + "\n";
+		s += "children: " + this.children.size() + "\n";
 		s += "carriedPackages: \n";
 		for (Package pck : this.packagesCarried) {
 			s += pck.getPackageId() + " (" + pck.getText() + ")\n";
@@ -29,7 +32,6 @@ public class Tree {
 		return s;
 	}
 
-	// NAGY FÁNÁL STACKOVERFLOW!
 	public String toString() {
 		String s = "\nTree\n";
 		s += "actualPlanet: " + this.actualPlanet.getName() + "\n";
@@ -93,19 +95,19 @@ public class Tree {
 		this.children = children;
 	}
 
+	public boolean isJustJumped() {
+		return justJumped;
+	}
+
+	public void setJustJumped(boolean justJumped) {
+		this.justJumped = justJumped;
+	}
+
 	public Tree getParent() {
 		return parent;
 	}
 
 	public void setParent(Tree parent) {
 		this.parent = parent;
-	}
-
-	public boolean isDoneSomething() {
-		return doneSomething;
-	}
-
-	public void setDoneSomething(boolean doneSomething) {
-		this.doneSomething = doneSomething;
 	}
 }
