@@ -16,8 +16,8 @@ public class AdamLogic implements Logic {
 	private SpaceShip ship;
 	private Reckoner r = null;
 	private String targetPlanet;
-	
-	private int total=0;
+
+	private int total = 0;
 
 	public void init(ModelStore modelStrore) {
 		this.modelStore = modelStrore;
@@ -50,6 +50,7 @@ public class AdamLogic implements Logic {
 
 	public int[] pick() {
 		int[] t = new int[3];
+		int deep = 0;
 		if (r == null) {
 			t = moho();
 			for (model.Package p : getPlanet(ship.getPlanetName())
@@ -57,7 +58,7 @@ public class AdamLogic implements Logic {
 				if (t[0] != 0) {
 					if (p.getPackageId() == t[0]) {
 						targetPlanet = p.getTargetPlanet();
-						total+=p.getFee();
+						total += p.getFee();
 						break;
 					}
 				} else {
@@ -69,16 +70,17 @@ public class AdamLogic implements Logic {
 			Node n = r.getBestNode();
 			while (n.getParent() != null) {
 				n = n.getParent();
+				deep++;
 			}
 			if (n.getPack().getPackageId() != 0) {
 				t[0] = n.getPack().getPackageId();
 				targetPlanet = n.getPack().getTargetPlanet();
-				total+=n.getPack().getFee();
+				total += n.getPack().getFee();
 			} else {
 				System.err.println("Az Adam nem adott vissza packot :=(");
 			}
 		}
-		System.out.println("          >>> AdamTotalGold: "+total+" <<<");
+		System.out.println("          >>> AdamTotalGold: " + total + " <<< deepness: "+deep);
 		return t;
 	}
 
