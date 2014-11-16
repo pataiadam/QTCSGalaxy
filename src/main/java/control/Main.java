@@ -1,7 +1,6 @@
 package control;
 
 import model.ModelStore;
-import model.Package;
 import model.Planet;
 import control.api.RestAPI;
 import control.logic.Logic;
@@ -46,13 +45,13 @@ public class Main {
 		int g=0;
 		for(Planet pl : modelStrore.getPlanets()){
 			String pln=pl.getName();
-			for(Package pa : pl.getPackages()){
-				if(!pa.getOriginalPlanet().equals(pln)){
+			for(model.Package pa : pl.getPackages()){
+				if(pa.getOriginalPlanet().equals(pln)){
 					g+=pa.getFee();
 				}
 			}
 		}
 		
-		return ">>>>>Total gold<<<<<: [ "+ (51500-g) + " ] ";
+		return ">>>>>Total gold<<<<<: [ "+ (g) + " ] ";
 	}
 }

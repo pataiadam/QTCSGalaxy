@@ -1,59 +1,107 @@
 package control.logic;
 
 import java.util.ArrayList;
-import java.util.Random;
 
 import model.ModelStore;
+import model.Package;
 import model.Planet;
 import model.SpaceShip;
+import control.logic.adam.Node;
+import control.logic.adam.Reckoner;
 
 public class AdamLogic implements Logic {
 
-	ModelStore m;
+	private ModelStore modelStore;
+	private ArrayList<Planet> planets;
+	private SpaceShip ship;
+	private Reckoner r = null;
+	private String targetPlanet;
+	
+	private int total=0;
 
 	public void init(ModelStore modelStrore) {
-		m=modelStrore;
+		this.modelStore = modelStrore;
+		this.planets = modelStrore.getPlanets();
+		this.ship = modelStrore.getSpaceShip();
 	}
 
 	public int[] drop() {
-		int[] t = new int[1];
-		t[0] = 5138166;
-		return t;
+		int[] ret = new int[3];
+		/**
+		 * ha valamiért elszállt, akkor lehet lesz a hajón felesleges csomag
+		 */
+		if (r == null) {
+			int i = 0;
+			for (Package p : ship.getPackages()) {
+				ret[i] = p.getPackageId();
+				i++;
+			}
+		} else {
+			int i = 0;
+			for (Package p : ship.getPackages()) {
+				if (p.getTargetPlanet().equals(ship.getPlanetName())) {
+					ret[i] = p.getPackageId();
+					i++;
+				}
+			}
+		}
+		return ret;
 	}
 
 	public int[] pick() {
-		int[] t = new int[1];
-		t[0] = 5138166;
+		int[] t = new int[3];
+		if (r == null) {
+			t = moho();
+			for (model.Package p : getPlanet(ship.getPlanetName())
+					.getPackages()) {
+				if (t[0] != 0) {
+					if (p.getPackageId() == t[0]) {
+						targetPlanet = p.getTargetPlanet();
+						total+=p.getFee();
+						break;
+					}
+				} else {
+					System.err.println("A moho nem adott vissza packot :=(");
+				}
+			}
+		} else {
+			r.setShutdown(true);
+			Node n = r.getBestNode();
+			while (n.getParent() != null) {
+				n = n.getParent();
+			}
+			if (n.getPack().getPackageId() != 0) {
+				t[0] = n.getPack().getPackageId();
+				targetPlanet = n.getPack().getTargetPlanet();
+				total+=n.getPack().getFee();
+			} else {
+				System.err.println("Az Adam nem adott vissza packot :=(");
+			}
+		}
+		System.out.println("          >>> AdamTotalGold: "+total+" <<<");
 		return t;
 	}
 
-	public String go() {
-		return getRandomPlanet();
+	private int[] moho() {
+		int[] ret = new int[3];
+		MohoLogic moho = new MohoLogic();
+		moho.init(this.modelStore);
+		return moho.pick();
 	}
 
-	private String getRandomPlanet(){
-		Random r = new Random();
-		return m.getPlanets().get(r.nextInt(m.getPlanets().size())).getName();
+	public String go() {
+		r = new Reckoner(targetPlanet, planets);
+		r.run();
+		return null;
 	}
-	
-	private String getNearest(SpaceShip spaceShip, ArrayList<Planet> planets) {
-		double min = Double.MAX_VALUE;
-		Planet origin=null;
-		for (Planet planet : planets) {
-			if(spaceShip.getPlanetName().equals(planet.getName())){
-				origin=planet;
-				break;
+
+	private Planet getPlanet(String targetPlanet) {
+		for (Planet p : planets) {
+			if (p.getName().equals(targetPlanet)) {
+				return p;
 			}
 		}
-		String ret="";
-		for (Planet planet : planets) {
-			if(origin.distFrom(planet)<min && !origin.equals(planet)){
-				ret=planet.getName();
-				min=origin.distFrom(planet);
-			}
-		}
-		
-		return ret;
+		return null;
 	}
 
 }
