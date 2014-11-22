@@ -12,17 +12,23 @@ public class Control {
 
 	public int[] drop(int[] drops) throws InterruptedException {
 		String ret = "";
+		int[] dropped = new int[3];
+		int k=0;
 		if (drops != null) {
 			for (int i : drops) {
 				if (i != 0) {
 					ret += i + " ";
-					api.dropPackage(i);
+					String response=api.dropPackage(i);
+					if(response.contains("PACKAGE_DROPPED")){
+						dropped[k]=i;
+						k++;
+					}
 				}
 			}
 		}
 		if (Main.DEBUG)
 			System.out.println("Dropped: [ " + ret + "]");
-		return drops;
+		return dropped;
 	}
 
 	public int[] pick(int[] picks) throws InterruptedException {
