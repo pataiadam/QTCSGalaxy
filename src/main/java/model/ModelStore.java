@@ -1,20 +1,65 @@
 package model;
 
 import java.util.ArrayList;
+import java.util.Date;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
 
+import control.Main;
 import control.api.RestAPI;
 
 public class ModelStore {
 
 	private ArrayList<Planet> planets;
 	private SpaceShip spaceShip;
+	private int totalGold = 0;
+	private long sta = System.currentTimeMillis(); 
 
 	public void refreshModel(RestAPI galaxy) {
 		planets = setPlanets(galaxy.getGalaxy());
+		spaceShip = setSpaceShip(galaxy.whereIs());
+		setPackagesDistance();
+	}
+
+	private void setPackagesDistance() {
+		for (Planet p : planets) {
+			for (Package pa : p.getPackages()) {
+				double targetPlanetDistance = getPlanetByName(
+						pa.getOriginalPlanet()).distFrom(
+						getPlanetByName(pa.getTargetPlanet()));
+				pa.setTargetPlanetDistance(targetPlanetDistance);
+			}
+		}
+
+	}
+
+	public void refreshModel(RestAPI galaxy, int[] dropped) {
+		if (dropped != null) {
+			for (Planet pl : planets) {
+				for (int i : dropped) {
+					Package rem = null;
+					for (Package pa : pl.getPackages()) {
+						if (i == pa.getPackageId()) {
+							totalGold += pa.getFee();
+							if (Main.DEBUG){
+								long elt=System.currentTimeMillis()-sta;
+								double k=3600000/elt;
+								System.out.println(">>>> TOTAL GOLD: "
+										+ totalGold + "<<<< " + "egy óra alatt kb: "+ totalGold*k + " ennyi idő (s) telt el: "+elt/1000);
+							
+							}
+							rem = pa;
+							break;
+						}
+					}
+					pl.getPackages().remove(rem);
+				}
+			}
+		} else {
+			planets = setPlanets(galaxy.getGalaxy());
+		}
 		spaceShip = setSpaceShip(galaxy.whereIs());
 	}
 
@@ -100,4 +145,19 @@ public class ModelStore {
 	public SpaceShip getSpaceShip() {
 		return spaceShip;
 	}
+
+	public Planet getPlanetByName(String planetName) {
+		for (Planet p : planets) {
+			if (p.getName().equals(planetName)) {
+				return p;
+			}
+		}
+		return null;
+	}
+
+	public double getDistanceByName(String planetName, String planetName2) {
+		return getPlanetByName(planetName).distFrom(
+				getPlanetByName(planetName2));
+	}
+
 }

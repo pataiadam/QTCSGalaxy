@@ -10,6 +10,7 @@ public class Package {
 	// ne kelljen stringeken vegigmenni osszehasonlitasnal
 	private int targetPlanetIndex;
 	private int originalPlanetIndex;
+	private double targetPlanetDistance;
 
 	public Package() {
 	}
@@ -86,5 +87,13 @@ public class Package {
 
 	public void setOriginalPlanetIndex(int originalPlanetIndex) {
 		this.originalPlanetIndex = originalPlanetIndex;
+	}
+
+	public double getTargetPlanetDistance() {
+		return targetPlanetDistance;
+	}
+
+	public void setTargetPlanetDistance(double targetPlanetDistance) {
+		this.targetPlanetDistance = targetPlanetDistance;
 	}
 }
