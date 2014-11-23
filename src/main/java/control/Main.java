@@ -8,32 +8,41 @@ import control.logic.Logic;
 
 public class Main {
 
-	public static boolean DEBUG=true;
-	
+	public static boolean DEBUG = true;
+
 	public static void main(String[] args) {
 		if (args.length == 3) {
 			RestAPI galaxy = new RestAPI(args[0], args[1], args[2]);
 			Logic logic = new BrutalMohoLogic();
 			Control control = new Control(galaxy);
 			ModelStore modelStrore = new ModelStore();
-			int[] dropped=null;
-			String went = null;
+			int[] dropped = null;
 			while (true) {
 				try {
 					modelStrore.refreshModel(galaxy, dropped);
-					int ms=modelStrore.getSpaceShip().getArriveAfterMs();
-					System.out.println("Úton még: "+ms+"ms");
+					int ms = modelStrore.getSpaceShip().getArriveAfterMs();
+					if (DEBUG) {
+						System.out.println("Irány a "
+								+ modelStrore.getSpaceShip()
+										.getTargetPlanetName() + ", érkezés: "
+								+ ms + "ms múlva");
+						System.out.println("Csomagok száma: "
+								+ modelStrore.getSpaceShip().getPackages()
+										.size());
+					}
 					if (ms == -1) {
 						logic.init(modelStrore);
-						dropped=control.drop(logic.drop());
+						dropped = control.drop(logic.drop());
 						control.pick(logic.pick());
-						went=control.go(logic.go());
-					} else if (modelStrore.getSpaceShip().getArriveAfterMs() >= 500) {
-						//ez csak azért, hogy ne írjon annyit a konzolra
-						Thread.sleep(500);
+						control.go(logic.go());
+					} else if (modelStrore.getSpaceShip().getArriveAfterMs() >= 1000) {
+						Thread.sleep(1000);
 					}
 				} catch (Exception e) {
-					System.err.println("HOPPÁ");
+					if (DEBUG) {
+						System.err.println("HOPPÁ");
+						e.printStackTrace();
+					}
 				}
 			}
 

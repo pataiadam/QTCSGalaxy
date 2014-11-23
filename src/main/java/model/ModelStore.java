@@ -15,12 +15,17 @@ public class ModelStore {
 	private ArrayList<Planet> planets;
 	private SpaceShip spaceShip;
 	private int totalGold = 0;
-	private long sta = System.currentTimeMillis(); 
+	private boolean firstInit=true;
+	private long sta = System.currentTimeMillis();
+	
 
 	public void refreshModel(RestAPI galaxy) {
 		planets = setPlanets(galaxy.getGalaxy());
 		spaceShip = setSpaceShip(galaxy.whereIs());
-		setPackagesDistance();
+		if(firstInit){
+			setPackagesDistance();
+			firstInit=false;
+		}
 	}
 
 	private void setPackagesDistance() {
@@ -30,6 +35,10 @@ public class ModelStore {
 						pa.getOriginalPlanet()).distFrom(
 						getPlanetByName(pa.getTargetPlanet()));
 				pa.setTargetPlanetDistance(targetPlanetDistance);
+				if (Main.DEBUG)
+					System.out.println(pa.getOriginalPlanet() + " "
+							+ pa.getTargetPlanet() + " "
+							+ pa.getTargetPlanetDistance());
 			}
 		}
 
@@ -43,12 +52,16 @@ public class ModelStore {
 					for (Package pa : pl.getPackages()) {
 						if (i == pa.getPackageId()) {
 							totalGold += pa.getFee();
-							if (Main.DEBUG){
-								long elt=System.currentTimeMillis()-sta;
-								double k=3600000/elt;
+							if (Main.DEBUG) {
+								long elt = System.currentTimeMillis() - sta;
+								double k = 3600000 / elt;
 								System.out.println(">>>> TOTAL GOLD: "
-										+ totalGold + "<<<< " + "egy óra alatt kb: "+ totalGold*k + " ennyi idő (s) telt el: "+elt/1000);
-							
+										+ totalGold + "<<<< "
+										+ "egy óra alatt kb: "
+										+ ((double) totalGold) * k
+										+ " ennyi idő (s) telt el: " + elt
+										/ 1000);
+
 							}
 							rem = pa;
 							break;
@@ -59,6 +72,10 @@ public class ModelStore {
 			}
 		} else {
 			planets = setPlanets(galaxy.getGalaxy());
+			if(firstInit){
+				setPackagesDistance();
+				firstInit=false;
+			}
 		}
 		spaceShip = setSpaceShip(galaxy.whereIs());
 	}
@@ -147,6 +164,9 @@ public class ModelStore {
 	}
 
 	public Planet getPlanetByName(String planetName) {
+		if (planetName == null) {
+			return null;
+		}
 		for (Planet p : planets) {
 			if (p.getName().equals(planetName)) {
 				return p;

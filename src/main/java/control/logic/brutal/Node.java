@@ -9,10 +9,18 @@ public class Node {
 	Package[] packs;
 	double h;
 	
+	/**
+	 * kiszámoljuk H-t. Ha ez magas akkor megéri a csomago(ka)t leszállítani
+	 * 
+	 * @param m - csak a getdistance függvénye miatt kell
+	 * @param packages 
+	 */
 	public Node(ModelStore m, Package...packages) {
 		int i=0;
 		packs=packages;
+		//sebesség 0, 1, 2, ill 3 csomaggal
 		double[] speed = {170.0, 150.0, 130.0, 110.0};
+		
 		if(packs.length==1){
 			h=(speed[1]*((double)packs[0].getFee()))/(packs[0].getTargetPlanetDistance()+1);
 		}
@@ -49,8 +57,12 @@ public class Node {
 		return ret;
 	}
 	
-	public Package getNextPack(){
-		return packs[0];
+	public Package getNextPack(String act){
+		for(Package p : packs){
+			if(!p.getTargetPlanet().equals(act))
+				return p;
+		}
+		return null;
 	}
 	
 	public void pastePack(Package p){
