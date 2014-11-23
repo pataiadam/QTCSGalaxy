@@ -36,11 +36,10 @@ public class BrutalMohoLogic implements Logic {
 		int[] ret = new int[3];
 		droppedCount = 0;
 
-		if (route == null) {
+		if (route == null || route.isEmpty()) {
 			for (Package p : ship.getPackages()) {
 				ret[droppedCount] = p.getPackageId();
 				droppedCount++;
-
 			}
 			return ret;
 		}
@@ -49,6 +48,7 @@ public class BrutalMohoLogic implements Logic {
 			if (p.getTargetPlanet().equals(actualPlanetName)) {
 				ret[droppedCount] = p.getPackageId();
 				droppedCount++;
+				route.dropPack(p);
 			}
 		}
 		return ret;
@@ -59,16 +59,27 @@ public class BrutalMohoLogic implements Logic {
 
 		if (Main.DEBUG) {
 			System.out.println("Jelenlegi bolygó: " + pl.getName());
-			System.out.println("Ahova még menni kell:");
+			System.out.println(ship.getPackages().size()
+					+ " csomag volt nálam, amiből " + droppedCount
+					+ "-t ledobtam");
+			System.out.println("A targetok között szerepel: ");
 			for (Package p : ship.getPackages()) {
-				System.out.println("     - " + p.getTargetPlanet());
+				if (!p.getTargetPlanet().equals(pl.getName()))
+					System.out.println("    - " + p.getTargetPlanet());
 			}
 		}
 		/**
 		 * Itt kezdődik a lényeg: ha a hajó üres, vagy a tervezett útvonal null,
 		 * akkor indul a Brutalmoho
 		 */
-		if (ship.getPackages().size() == droppedCount || route == null) {
+		boolean buildRoute = false;
+		if (route != null) {
+			buildRoute = route.isEmpty();
+		} else {
+			buildRoute = true;
+		}
+
+		if (buildRoute) {
 			System.out.println("BrutalMOHÓ indul");
 			/**
 			 * Minden csomagra az aktuális bolygón:
@@ -102,12 +113,6 @@ public class BrutalMohoLogic implements Logic {
 			}
 
 			System.out.println("BrutalMohó vége: " + q.size());
-			// ennek csak akkor van értelme ha a minfee nem 0
-			if (q.size() == 0) {
-				minFee -= 5;
-				return pick();
-			}
-			// az útvonalat a Node route tartalmazza
 			this.route = q.remove();
 			// a getPicks megadja a felvenni kívánt csomagokat
 			return route.getPicks();
@@ -125,7 +130,7 @@ public class BrutalMohoLogic implements Logic {
 			Planet next = ms.getPlanetByName(npack.getTargetPlanet());
 
 			// 1 2 3
-			double sheep = ship.getPackages().size();
+			double sheep = (double) route.getPackSize();
 			double[] speed = { 170, 150, 130, 110 };
 
 			if (sheep == 3) {
@@ -181,7 +186,7 @@ public class BrutalMohoLogic implements Logic {
 	}
 
 	public String go() {
-		return route.getNext();
+		return route.getNextTarget();
 	}
 
 }

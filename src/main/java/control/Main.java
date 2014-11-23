@@ -20,7 +20,7 @@ public class Main {
 			while (true) {
 				try {
 					modelStrore.refreshModel(galaxy, dropped);
-					int ms = modelStrore.getSpaceShip().getArriveAfterMs();
+					long ms = (long)modelStrore.getSpaceShip().getArriveAfterMs();
 					if (DEBUG) {
 						System.out.println("Irány a "
 								+ modelStrore.getSpaceShip()
@@ -35,8 +35,8 @@ public class Main {
 						dropped = control.drop(logic.drop());
 						control.pick(logic.pick());
 						control.go(logic.go());
-					} else if (modelStrore.getSpaceShip().getArriveAfterMs() >= 1000) {
-						Thread.sleep(1000);
+					} else {
+						Thread.sleep(ms);
 					}
 				} catch (Exception e) {
 					if (DEBUG) {
